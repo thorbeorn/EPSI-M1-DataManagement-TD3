@@ -22,17 +22,18 @@ def extract_Dataframe_From_CSV(path):
 def lowercase_Dataframe_Column(dataframe, column):
     if column not in dataframe.columns:
         raise ValueError(f"lowercase_Dataframe_Column: {column} is not in dataframe columns")
-    dataframe[column] = dataframe[column].astype(str).str.lower()
+    dataframe[column] = dataframe[column].astype('string').str.lower()
+    dataframe[column] = dataframe[column].replace("", pd.NA)
     return dataframe
 def replace_Dataframe_Column_Not_Numeric_To_NULL(dataframe, column):
     if column not in dataframe.columns:
         raise ValueError(f"lowercase_Dataframe_Column: {column} is not in dataframe columns")
-    dataframe[column] = pd.to_numeric(dataframe[column], errors='coerce', downcast='integer').astype("int64")
+    dataframe[column] = pd.to_numeric(dataframe[column], errors='coerce').round().astype("Int64")
     return dataframe
 def replace_Dataframe_Column_Not_Datetime_To_NULL(dataframe, column):
     if column not in dataframe.columns:
         raise ValueError(f"lowercase_Dataframe_Column: {column} is not in dataframe columns")
-    dataframe[column] = pd.to_datetime(dataframe[column], errors='coerce')
+    dataframe[column] = pd.to_datetime(dataframe[column], errors='coerce', format='mixed')
     return dataframe
 
 def transform_data(dataframe) :
@@ -52,30 +53,27 @@ def validate_data(dataframe):
             "user_id": Column(
                 int,
                 unique=True,
-                checks=Check.not_equal_to("nan"),
-                nullable=True
+                nullable=False
             ),
             "username": Column(
                 str,
-                checks=Check.not_equal_to("nan"),
-                nullable=True
+                nullable=False
             ),
             "age": Column(
                 int,
                 checks=Check.between(-20, 100),
-                nullable=True
+                nullable=False
             ),
             "email": Column(
                 str,
                 checks=Check.str_matches(
                     r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
                 ),
-                nullable=True
+                nullable=False
             ),
             "signup_date": Column(
                 datetime,
-                checks=Check.not_equal_to("nan"),
-                nullable=True
+                nullable=False
             )
         },
         strict=True
