@@ -15,26 +15,38 @@ def extract_Dataframe_From_CSV(path):
     except Exception as e:
         raise ValueError(f"Error loading data: {e}")
 
+def lowercase_Dataframe_Column(dataframe, column):
+    if column not in dataframe.columns:
+        raise ValueError(f"lowercase_Dataframe_Column: {column} is not in dataframe columns")
+    dataframe[column] = dataframe[column].astype(str).str.lower()
+    return dataframe
+def replace_Dataframe_Column_Not_Numeric_To_NULL(dataframe, column):
+    if column not in dataframe.columns:
+        raise ValueError(f"lowercase_Dataframe_Column: {column} is not in dataframe columns")
+    dataframe[column] = pd.to_numeric(dataframe[column], errors='coerce')
+    return dataframe
+def replace_Dataframe_Column_Not_Datetime_To_NULL(dataframe, column):
+    if column not in dataframe.columns:
+        raise ValueError(f"lowercase_Dataframe_Column: {column} is not in dataframe columns")
+    dataframe[column] = pd.to_datetime(dataframe[column], errors='coerce')
+    return dataframe
+def replace_NaN_By_NULL(dataframe):
+    dataframe = dataframe.replace(r'^\s*$', pd.NA, regex=True)
+    dataframe = dataframe.fillna("NULL")
+    return dataframe
+
 def transform_data(dataframe) :
     if not isinstance(dataframe, pd.DataFrame):
         raise ValueError("transform_data: input is not a pandas DataFrame")
 
     #No transformation for user_id
-    if 'signup_date' in dataframe.columns:
-        dataframe['signup_date'] = dataframe['signup_date'].replace(r'^\s*$', pd.NA, regex=True)
-        dataframe['signup_date'] = pd.to_datetime(
-            dataframe['signup_date'], errors='coerce'
-        )
-    else:
-        print("transform_data: 'signup_date' column not found in DataFrame")
-    
-    if 'email' in dataframe.columns:
-        dataframe['email'] = dataframe['email'].astype(str).str.lower()
-    else:
-        print("transform_data: 'email' column not found in DataFrame")
-        
-    dataframe = dataframe.replace(r'^\s*$', pd.NA, regex=True)  # vide -> NaN
-    dataframe = dataframe.fillna("NULL")
+
+    dataframe = lowercase_Dataframe_Column(dataframe, "username")
+    dataframe = lowercase_Dataframe_Column(dataframe, "email")
+    dataframe = replace_Dataframe_Column_Not_Numeric_To_NULL(dataframe, "age")
+    dataframe = replace_Dataframe_Column_Not_Datetime_To_NULL(dataframe, "signup_date")
+
+    dataframe = replace_NaN_By_NULL(dataframe)
 
     return dataframe
 
